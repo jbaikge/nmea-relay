@@ -146,6 +146,16 @@ func TestChecksum(t *testing.T) {
 	}
 }
 
+func TestDecode(t *testing.T) {
+	for _, s := range sentences {
+		m, err := Decode(s)
+		if err != nil {
+			t.Error(err)
+		}
+		t.Log(m)
+	}
+}
+
 func TestInvalidChecksum(t *testing.T) {
 	for _, s := range invalid {
 		if ValidChecksum(s) {
