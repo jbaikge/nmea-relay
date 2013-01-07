@@ -32,7 +32,7 @@ func connect(host, port) {
 
 func parseSentences(conn) {
 	for {
-		sentence, err := bufio.NewReader(conn).ReadString('\n')
+		sentence, err := bufio.NewReaderSize(conn, 80).ReadBytes('\n')
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(3)
