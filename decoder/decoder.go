@@ -1,7 +1,7 @@
 package decoder
 
 import (
-	"strconv"
+	"encoding/hex"
 )
 
 /*
@@ -44,25 +44,33 @@ type Location struct {
 	Longitude float64
 }
 
-func Decode(s string) (l Location, err error) {
+func Decode(s []byte) (l Location, err error) {
 	return
 }
 
-func Checksum(s string) (sum int64) {
+func Checksum(s []byte) (sum byte) {
 	for i := 0; i < len(s); i++ {
-		sum ^= int64(s[i])
+		sum ^= s[i]
 	}
 	return
 }
 
-func Split(s string) (sentence string, checksum int64, err error) {
-	checksum, err = strconv.ParseInt(s[len(s)-2:], 16, 0)
+func Split(s []byte) (sentence []byte, checksum byte, err error) {
+	// Convert last 2 characters of sentence from hex
+	buf := []byte{0}
+	if _, err = hex.Decode(buf, s[len(s)-2:]); err != nil {
+		return
+	}
+	checksum = buf[0]
 	// Trim leading $ and everything after *
 	sentence = s[1 : len(s)-3]
 	return
 }
 
-func ValidChecksum(s string) bool {
-
-	return true
+func ValidChecksum(s []byte) bool {
+	s, c, err := Split(s)
+	if err != nil {
+		return false
+	}
+	return c == Checksum(s)
 }
