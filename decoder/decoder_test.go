@@ -127,6 +127,11 @@ var (
 		[]byte("$GPGGA,191124.868,4609.142,S,17046.720,W,0,00,,,M,,M,,*49"),
 		[]byte("$GPGLL,4609.142,S,17046.720,W,191125.868,V*28"),
 		[]byte("$GPVTG,2.75,T,,M,13.3,N,24.5,K*52"),
+		// From phone
+		[]byte("$GPGLL,3848.3586,N,07702.9687,W,222615,A*35"),
+		[]byte("$GPGLL,3848.3593,N,07702.9659,W,222616,A*31"),
+		[]byte("$GPGLL,3848.3568,N,07702.9612,W,222617,A*3B"),
+		[]byte("$GPGLL,3848.3507,N,07702.9602,W,222618,A*3C"),
 	}
 	invalid = [][]byte{
 		[]byte("$GPRMC,191123.868,V,4609.142,S,17046.720,W,13.3,2.75,060113,,E*57"),
@@ -158,7 +163,11 @@ func TestDecode(t *testing.T) {
 
 func TestInvalidChecksum(t *testing.T) {
 	for _, s := range invalid {
-		if ValidChecksum(s) {
+		s, c, err := Split(s)
+		if err != nil {
+			t.Error(err)
+		}
+		if c == Checksum(s) {
 			t.Errorf("Expected invalid checksum on %s", s)
 		}
 	}
@@ -170,14 +179,6 @@ func TestSplit(t *testing.T) {
 		rebuilt := fmt.Sprintf("$%s*%0X", s, c)
 		if string(sentence) != rebuilt {
 			t.Errorf("Rebuild failed. Expect %s Got: %s", sentence, rebuilt)
-		}
-	}
-}
-
-func TestValidChecksum(t *testing.T) {
-	for _, s := range sentences {
-		if !ValidChecksum(s) {
-			t.Errorf("Invalid checksum on %s", s)
 		}
 	}
 }

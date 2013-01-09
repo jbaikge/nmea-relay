@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -60,8 +61,12 @@ type Message struct {
 var decoders = []Decoder{}
 
 func Decode(s []byte) (m Message, err error) {
-	if !ValidChecksum(s) {
-		err = errors.New("Checksum mismatch")
+	sentence, checksum, err := Split(s)
+	if err != nil {
+		return
+	}
+	if checksum != Checksum(sentence) {
+		err = errors.New(fmt.Sprintf("Checksum mismatch. Expected %0X, Got %0X", checksum, Checksum(sentence)))
 		return
 	}
 	firstComma := bytes.IndexByte(s, ',')
@@ -100,12 +105,4 @@ func Split(s []byte) (sentence []byte, checksum byte, err error) {
 	// Trim leading $ and everything after *
 	sentence = s[1 : len(s)-3]
 	return
-}
-
-func ValidChecksum(s []byte) bool {
-	s, c, err := Split(s)
-	if err != nil {
-		return false
-	}
-	return c == Checksum(s)
 }
